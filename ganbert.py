@@ -36,7 +36,7 @@ flags.DEFINE_string(
     "data_dir", None,
     "The input data dir. Should contain the .tsv files (or other data files) "
     "for the task.")
-
+# Aqui, ele está configurando os parâmetros e o ambiente do modelo BERT e GAN
 flags.DEFINE_string(
     "bert_config_file", None,
     "The config json file corresponding to the pre-trained BERT model. "
@@ -365,7 +365,7 @@ def _truncate_seq_pair(tokens_a, tokens_b, max_length):
     else:
       tokens_b.pop()
 
-
+# Aqui, ele recebe as amostras do gerador e tenta determinar se elas são reais ou falsas. Ele aplica camadas densas e ativações para calcular probabilidades.
 ############ Defining Discriminator ############
 def discriminator(x, d_hidden_size, dkp, is_training, num_labels, num_hidden_discriminator = 1, reuse = False):
     with tf.compat.v1.variable_scope('Discriminator', reuse = reuse):
@@ -380,7 +380,7 @@ def discriminator(x, d_hidden_size, dkp, is_training, num_labels, num_hidden_dis
         prob = tf.nn.softmax(logit)
     return flatten5, logit, prob
 
-
+# Aqui, ele cria exemplos falsos. Ele usa variáveis latentes z e aplica camadas densas e ativação de Leaky ReLU para produzir exemplos.
 ############ Defining Generator ############
 def generator(z, g_hidden_size, dkp, is_training, num_hidden_generator = 1, reuse = False):
     with tf.compat.v1.variable_scope('Generator', reuse = reuse):
@@ -394,7 +394,7 @@ def generator(z, g_hidden_size, dkp, is_training, num_hidden_generator = 1, reus
 
     return layer_hidden
 
-
+# Aqui, incorporo a saída do BERT
 def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
                  labels, num_labels, use_one_hot_embeddings, label_mask):
   """Creates a classification model."""
@@ -433,6 +433,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
     per_example_loss = -tf.reduce_sum(one_hot_labels * log_probs, axis=-1)
     D_L_Supervised = tf.reduce_mean(per_example_loss)
 
+# Aqui, ocorre o feedback ao gerador através do cálculo das perdas (loss). O código calcula a perda do discriminador e do gerador com base nas amostras reais e falsas, ajustando ambos os modelos.
   z = tf.random_uniform([FLAGS.train_batch_size, LATENT_Z], minval=0, maxval=1, dtype=tf.float32, seed=SEED, name=None)
   x_g = generator(z, hidden_size, keep_prob, is_training=is_training, reuse=False)
   D_fake_features, DU_fake_logits, DU_fake_prob = discriminator(x_g, hidden_size, keep_prob, is_training, num_labels, reuse=True)
@@ -510,7 +511,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
 
     output_spec = None
     if mode == tf.estimator.ModeKeys.TRAIN:
-
+    #Aqui, é a fase final que consiste no treinamento tanto do BERT quanto do GAN
       d_train_op = optimization.create_optimizer("d", d_vars,
           d_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu)
 
