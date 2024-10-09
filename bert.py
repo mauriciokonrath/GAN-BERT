@@ -322,7 +322,7 @@ def _truncate_seq_pair(tokens_a, tokens_b, max_length):
     else:
       tokens_b.pop()
 
-
+#Aqui define o modelo BERT
 def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
                  labels, num_labels, use_one_hot_embeddings):
   """Creates a classification model."""
@@ -348,7 +348,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
   with tf.variable_scope("loss"):
     if is_training:
       output_layer = tf.nn.dropout(output_layer, keep_prob=0.9)
-
+#Aqui, a partir dessa output_layer, ele aplica uma camada densa para gerar logits que serão utilizados na classificação. 
     logits = tf.matmul(output_layer, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
     probabilities = tf.nn.softmax(logits, axis=-1)
@@ -417,7 +417,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
 
     output_spec = None
     if mode == tf.estimator.ModeKeys.TRAIN:
-
+    # Aqui, realiza o treinamento e a avaliação usando o estimador (TPUEstimator)
       train_op = optimization.create_optimizer("overall", tvars,
           total_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu)
 
@@ -465,7 +465,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
 
   return model_fn
 
-
+#Aqui, é calculado as métricas de avaliação, como precisão, recall, e F1, usando a biblioteca tf_metrics. 
 def evaluate(estimator, label_rate, eval_examples, task_name, label_list, tokenizer):
     num_actual_eval_examples = len(eval_examples)
     if FLAGS.use_tpu:
@@ -547,7 +547,8 @@ def main(_):
 
   if task_name not in processors:
     raise ValueError("Task not found: %s" % (task_name))
-
+      
+ #Aqui, os dados são pré-processados, e os exemplos são convertidos em features adequadas para o BERT
   processor = processors[task_name]()
 
   label_list = processor.get_labels()
